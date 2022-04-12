@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-VERSION=1.1.1
-DEFAULT_META_IMAGE=wildducktheories/y2j
+VERSION=1.2
+DEFAULT_META_IMAGE=eth-its/y2j
 META_IMAGE=${META_IMAGE:-${DEFAULT_META_IMAGE}}
 
 die() {
@@ -48,11 +48,8 @@ installer() {
 base64() {
     META_IMAGE=${META_IMAGE}
     BASE64=\$(which base64 2>/dev/null)
-    DOCKER=\$(which docker 2>/dev/null)
     if test -n "\$BASE64"; then
         \$BASE64 "\$@"
-    elif test -n "$DOCKER"; then
-        docker run --rm -i \${META_IMAGE} base64 "\$@"
     else
         echo "No base64 on this device. Cannot continue"
         exit 1
@@ -94,11 +91,8 @@ version() {
 
 python() {
     PYTHON=$(which python3 2>/dev/null)
-    DOCKER=$(which docker 2>/dev/null)
     if test -n "$PYTHON" && $PYTHON -c 'import sys, yaml, json;' 2>/dev/null; then
         $PYTHON "$@"
-    elif test -n "$DOCKER"; then
-        docker run --rm -i ${META_IMAGE} python "$@"
     else
         echo "Python not configured correctly on this device. Cannot continue"
         exit 1
