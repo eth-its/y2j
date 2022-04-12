@@ -38,13 +38,16 @@ installer() {
 base64() {
 	META_IMAGE=${META_IMAGE}
 	BASE64=\$(which base64 2>/dev/null)
+	DOCKER=\$(which docker 2>/dev/null)
 	if test -n "\$BASE64"; then
 		\$BASE64 "\$@"
-	else
+	elif test -n "$DOCKER"; then
 		docker run --rm -i \${META_IMAGE} base64 "\$@"
+	else
+		echo "No base64 on this device. Cannot continue"
+		exit 1
 	fi
 }
-
 
 decode_opt() {
 	TEST_DECODE=\$(echo "MAo=" | base64 -D 2>/dev/null)
@@ -79,13 +82,23 @@ version() {
 	echo "y2j.sh-${VERSION}"
 }
 
-
 python() {
-	PYTHON=$(which python 2>/dev/null)
+	PYTHON=$(which python3 2>/dev/null)
+	DOCKER=$(which docker 2>/dev/null)
 	if test -n "$PYTHON" && $PYTHON -c 'import sys, yaml, json;' 2>/dev/null; then
 		$PYTHON "$@"
-	else
+	elif test -n "$PYTHON"; then
+		if $PYTHON -m pip install pyyaml; then
+			$PYTHON "$@"
+		else
+			echo "could not install pyyaml. Cannot continue."
+			exit 1
+		fi
+	elif test -n "$DOCKER"; then
 		docker run --rm -i ${META_IMAGE} python "$@"
+	else
+		echo "No python on this device. Cannot continue"
+		exit 1
 	fi
 }
 
