@@ -93,6 +93,7 @@ version() {
 }
 
 python() {
+    PYTHON=$(which python3 2>/dev/null)
     DOCKER=$(which docker 2>/dev/null)
     if test -n "$PYTHON" && $PYTHON -c 'import sys, yaml, json;' 2>/dev/null; then
         $PYTHON "$@"
